@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Project Tracker{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📁</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_projects }}</span>
+            <span class="stat-label">Total Projects</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ active_projects }}</span>
+            <span class="stat-label">Active Projects</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ completed_projects }}</span>
+            <span class="stat-label">Completed</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ avg_progress }}%</span>
+            <span class="stat-label">Avg Progress</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_blogs }}</span>
+            <span class="stat-label">Total Blogs</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ draft_blogs }}</span>
+            <span class="stat-label">Draft Blogs</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🚀</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ published_blogs }}</span>
+            <span class="stat-label">Published</span>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-sections">
+    <section class="section">
+        <div class="section-header">
+            <h3>Recently Updated Projects</h3>
+            <a href="{{ url_for('projects.index') }}" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        {% if recent_projects %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in recent_projects %}
+                        <tr>
+                            <td><a href="{{ url_for('projects.detail', id=project.id) }}">{{ project.name }}</a></td>
+                            <td><span class="badge badge-{{ project.status.lower().replace(' ', '-') }}">{{ project.status }}</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ project.progress }}%"></div>
+                                </div>
+                                <span class="progress-text">{{ project.progress }}%</span>
+                            </td>
+                            <td>{{ project.updated_at.strftime('%Y-%m-%d') if project.updated_at else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No projects yet. <a href="{{ url_for('projects.create') }}">Create your first project</a></p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="section">
+        <div class="section-header">
+            <h3>Recently Updated Blogs</h3>
+            <a href="{{ url_for('blogs.index') }}" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        {% if recent_blogs %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for blog in recent_blogs %}
+                        <tr>
+                            <td><a href="{{ url_for('blogs.detail', id=blog.id) }}">{{ blog.title }}</a></td>
+                            <td><span class="badge badge-{{ blog.status.lower().replace(' ', '-') }}">{{ blog.status }}</span></td>
+                            <td>{{ blog.updated_at.strftime('%Y-%m-%d') if blog.updated_at else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No blogs yet. <a href="{{ url_for('blogs.create') }}">Create your first blog</a></p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

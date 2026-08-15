@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ project.name }} - Project Tracker{% endblock %}
+
+{% block page_title %}Edit {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Edit Project</h2>
+    <a href="{{ url_for('projects.detail', id=project.id) }}" class="btn btn-secondary">Back to Project</a>
+</div>
+
+<form method="POST" action="{{ url_for('projects.edit', id=project.id) }}" class="project-form">
+    <div class="form-group">
+        <label for="name">Project Name <span class="required">*</span></label>
+        <input type="text" id="name" name="name" value="{{ form.name }}" maxlength="100" required>
+        {% if errors.name %}
+        <span class="error-message">{{ errors.name }}</span>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="4">{{ form.description }}</textarea>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                {% for s in valid_statuses %}
+                <option value="{{ s }}" {% if form.status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            {% if errors.status %}
+            <span class="error-message">{{ errors.status }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="progress">Progress (%)</label>
+            <input type="number" id="progress" name="progress" value="{{ form.progress }}" min="0" max="100" required>
+            {% if errors.progress %}
+            <span class="error-message">{{ errors.progress }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="github_url">GitHub/Repository URL</label>
+            <input type="url" id="github_url" name="github_url" value="{{ form.github_url }}" maxlength="255" placeholder="https://github.com/username/repo">
+            {% if errors.github_url %}
+            <span class="error-message">{{ errors.github_url }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="live_url">Live/Deployment URL</label>
+            <input type="url" id="live_url" name="live_url" value="{{ form.live_url }}" maxlength="255" placeholder="https://example.com">
+            {% if errors.live_url %}
+            <span class="error-message">{{ errors.live_url }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="tech_stack">Technology Stack</label>
+        <input type="text" id="tech_stack" name="tech_stack" value="{{ form.tech_stack }}" maxlength="255" placeholder="Python, Flask, PostgreSQL">
+        {% if errors.tech_stack %}
+        <span class="error-message">{{ errors.tech_stack }}</span>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" rows="4">{{ form.notes }}</textarea>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ url_for('projects.detail', id=project.id) }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}
