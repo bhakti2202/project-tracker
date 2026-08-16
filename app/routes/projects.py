@@ -7,8 +7,26 @@ bp = Blueprint('projects', __name__, url_prefix='/projects')
 
 @bp.route('/')
 def index():
-    projects = Project.query.order_by(Project.updated_at.desc()).all()
-    return render_template('projects/index.html', projects=projects)
+    search = request.args.get('q', '').strip()
+    status_filter = request.args.get('status', '').strip()
+    
+    query = Project.query
+    
+    if search:
+        search_term = f'%{search}%'
+        query = query.filter(
+            db.or_(
+                Project.name.ilike(search_term),
+                Project.description.ilike(search_term),
+                Project.tech_stack.ilike(search_term),
+            )
+        )
+    
+    if status_filter:
+        query = query.filter(Project.status == status_filter)
+    
+    projects = query.order_by(Project.updated_at.desc()).all()
+    return render_template('projects/index.html', projects=projects, search=search, status_filter=status_filter, valid_statuses=Project.VALID_STATUSES)
 
 
 def validate_project_form(form):

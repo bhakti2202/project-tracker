@@ -10,6 +10,27 @@
     <a href="{{ url_for('projects.create') }}" class="btn btn-primary">New Project</a>
 </div>
 
+<div class="filter-bar">
+    <form method="GET" class="filter-form">
+        <div class="filter-group">
+            <input type="search" name="q" class="filter-input" placeholder="Search name, description, tech stack..." value="{{ search }}">
+        </div>
+        <div class="filter-group">
+            <select name="status" class="filter-select">
+                <option value="">All Statuses</option>
+                {% for status in valid_statuses %}
+                <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>{{ status }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            {% if search or status_filter %}
+            <a href="{{ url_for('projects.index') }}" class="btn btn-secondary">Clear</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
 {% if projects %}
     <div class="table-responsive">
         <table class="data-table">

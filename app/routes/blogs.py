@@ -32,8 +32,26 @@ def validate_blog_form(form):
 
 @bp.route('/')
 def index():
-    blogs = Blog.query.order_by(Blog.updated_at.desc()).all()
-    return render_template('blogs/index.html', blogs=blogs)
+    search = request.args.get('q', '').strip()
+    status_filter = request.args.get('status', '').strip()
+    
+    query = Blog.query
+    
+    if search:
+        search_term = f'%{search}%'
+        query = query.filter(
+            db.or_(
+                Blog.title.ilike(search_term),
+                Blog.description.ilike(search_term),
+                Blog.tags.ilike(search_term),
+            )
+        )
+    
+    if status_filter:
+        query = query.filter(Blog.status == status_filter)
+    
+    blogs = query.order_by(Blog.updated_at.desc()).all()
+    return render_template('blogs/index.html', blogs=blogs, search=search, status_filter=status_filter, valid_statuses=Blog.VALID_STATUSES)
 
 
 @bp.route('/create', methods=['GET', 'POST'])

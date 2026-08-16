@@ -486,3 +486,227 @@ def test_blog_create_missing_title(client):
     
     assert response.status_code == 400
     assert b'Blog title is required' in response.data
+
+
+# Web-level search/filter tests for Projects
+def test_projects_index_search_by_name(client):
+    """Test searching projects by name."""
+    with client.application.app_context():
+        Project(name='Alpha Project', status='Idea', description='First project').save()
+        Project(name='Beta Project', status='Completed', description='Second project').save()
+        Project(name='Gamma', status='Planning', description='Third').save()
+    
+    response = client.get('/projects/?q=Alpha')
+    assert response.status_code == 200
+    assert b'Alpha Project' in response.data
+    assert b'Beta Project' not in response.data
+    assert b'Gamma' not in response.data
+
+
+def test_projects_index_search_by_description(client):
+    """Test searching projects by description."""
+    with client.application.app_context():
+        Project(name='Project A', status='Idea', description='Uses React').save()
+        Project(name='Project B', status='Completed', description='Uses Vue').save()
+    
+    response = client.get('/projects/?q=React')
+    assert response.status_code == 200
+    assert b'Project A' in response.data
+    assert b'Project B' not in response.data
+
+
+def test_projects_index_search_by_tech_stack(client):
+    """Test searching projects by tech stack."""
+    with client.application.app_context():
+        Project(name='Project A', status='Idea', tech_stack='Python, Flask').save()
+        Project(name='Project B', status='Completed', tech_stack='JavaScript, React').save()
+    
+    response = client.get('/projects/?q=Python')
+    assert response.status_code == 200
+    assert b'Project A' in response.data
+    assert b'Project B' not in response.data
+
+
+def test_projects_index_filter_by_status(client):
+    """Test filtering projects by status."""
+    with client.application.app_context():
+        Project(name='Idea Project', status='Idea').save()
+        Project(name='Completed Project', status='Completed').save()
+        Project(name='In Progress Project', status='In Progress').save()
+    
+    response = client.get('/projects/?status=Completed')
+    assert response.status_code == 200
+    assert b'Completed Project' in response.data
+    assert b'Idea Project' not in response.data
+    assert b'In Progress Project' not in response.data
+
+
+def test_projects_index_search_and_filter_combined(client):
+    """Test combined search and status filter."""
+    with client.application.app_context():
+        Project(name='Search Project', status='Completed', description='Test').save()
+        Project(name='Other Project', status='Idea', description='Test').save()
+    
+    response = client.get('/projects/?q=Search&status=Completed')
+    assert response.status_code == 200
+    assert b'Search Project' in response.data
+    assert b'Other Project' not in response.data
+    
+    # Different status should not match
+    response = client.get('/projects/?q=Search&status=Idea')
+    assert response.status_code == 200
+    assert b'Search Project' not in response.data
+
+
+def test_projects_index_clear_filter(client):
+    """Test that clear filter link works."""
+    with client.application.app_context():
+        Project(name='Test Project', status='Completed').save()
+    
+    # First with filter
+    response = client.get('/projects/?status=Completed')
+    assert response.status_code == 200
+    assert b'Test Project' in response.data
+    
+    # Clear filter (no params) should show all
+    response = client.get('/projects/')
+    assert response.status_code == 200
+    assert b'Test Project' in response.data
+
+
+def test_projects_index_empty_search_shows_all(client):
+    """Test empty search shows all projects."""
+    with client.application.app_context():
+        Project(name='Project 1', status='Idea').save()
+        Project(name='Project 2', status='Completed').save()
+    
+    response = client.get('/projects/?q=')
+    assert response.status_code == 200
+    assert b'Project 1' in response.data
+    assert b'Project 2' in response.data
+
+
+# Web-level search/filter tests for Blogs
+def test_blogs_index_search_by_title(client):
+    """Test searching blogs by title."""
+    with client.application.app_context():
+        Blog(title='First Blog Post', status='Published').save()
+        Blog(title='Second Blog Post', status='Draft').save()
+        Blog(title='Another Article', status='Idea').save()
+    
+    response = client.get('/blogs/?q=First')
+    assert response.status_code == 200
+    assert b'First Blog Post' in response.data
+    assert b'Second Blog Post' not in response.data
+    assert b'Another Article' not in response.data
+
+
+def test_blogs_index_search_by_description(client):
+    """Test searching blogs by description."""
+    with client.application.app_context():
+        Blog(title='Blog A', status='Published', description='About Python').save()
+        Blog(title='Blog B', status='Draft', description='About JavaScript').save()
+    
+    response = client.get('/blogs/?q=Python')
+    assert response.status_code == 200
+    assert b'Blog A' in response.data
+    assert b'Blog B' not in response.data
+
+
+def test_blogs_index_search_by_tags(client):
+    """Test searching blogs by tags."""
+    with client.application.app_context():
+        Blog(title='Blog A', status='Published', tags='python, flask').save()
+        Blog(title='Blog B', status='Draft', tags='javascript, react').save()
+    
+    response = client.get('/blogs/?q=flask')
+    assert response.status_code == 200
+    assert b'Blog A' in response.data
+    assert b'Blog B' not in response.data
+
+
+def test_blogs_index_filter_by_status(client):
+    """Test filtering blogs by status."""
+    with client.application.app_context():
+        Blog(title='Idea Blog', status='Idea').save()
+        Blog(title='Published Blog', status='Published').save()
+        Blog(title='Draft Blog', status='Draft').save()
+    
+    response = client.get('/blogs/?status=Published')
+    assert response.status_code == 200
+    assert b'Published Blog' in response.data
+    assert b'Idea Blog' not in response.data
+    assert b'Draft Blog' not in response.data
+
+
+def test_blogs_index_search_and_filter_combined(client):
+    """Test combined search and status filter for blogs."""
+    with client.application.app_context():
+        Blog(title='Search Blog', status='Published', description='Test').save()
+        Blog(title='Other Blog', status='Idea', description='Test').save()
+    
+    response = client.get('/blogs/?q=Search&status=Published')
+    assert response.status_code == 200
+    assert b'Search Blog' in response.data
+    assert b'Other Blog' not in response.data
+    
+    # Different status should not match
+    response = client.get('/blogs/?q=Search&status=Idea')
+    assert response.status_code == 200
+    assert b'Search Blog' not in response.data
+
+
+def test_blogs_index_clear_filter(client):
+    """Test that clear filter link works for blogs."""
+    with client.application.app_context():
+        Blog(title='Test Blog', status='Published').save()
+    
+    # First with filter
+    response = client.get('/blogs/?status=Published')
+    assert response.status_code == 200
+    assert b'Test Blog' in response.data
+    
+    # Clear filter (no params) should show all
+    response = client.get('/blogs/')
+    assert response.status_code == 200
+    assert b'Test Blog' in response.data
+
+
+def test_blogs_index_empty_search_shows_all(client):
+    """Test empty search shows all blogs."""
+    with client.application.app_context():
+        Blog(title='Blog 1', status='Idea').save()
+        Blog(title='Blog 2', status='Published').save()
+    
+    response = client.get('/blogs/?q=')
+    assert response.status_code == 200
+    assert b'Blog 1' in response.data
+    assert b'Blog 2' in response.data
+
+
+def test_projects_index_search_case_insensitive(client):
+    """Test search is case insensitive."""
+    with client.application.app_context():
+        Project(name='Test Project', status='Idea').save()
+    
+    response = client.get('/projects/?q=test')
+    assert response.status_code == 200
+    assert b'Test Project' in response.data
+    
+    response = client.get('/projects/?q=TEST')
+    assert response.status_code == 200
+    assert b'Test Project' in response.data
+
+
+def test_blogs_index_search_case_insensitive(client):
+    """Test blog search is case insensitive."""
+    with client.application.app_context():
+        Blog(title='Test Blog', status='Idea').save()
+    
+    response = client.get('/blogs/?q=test')
+    assert response.status_code == 200
+    assert b'Test Blog' in response.data
+    
+    response = client.get('/blogs/?q=TEST')
+    assert response.status_code == 200
+    assert b'Test Blog' in response.data
