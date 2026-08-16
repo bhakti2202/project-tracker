@@ -1,11 +1,29 @@
 // Main JavaScript file
 console.log('Project Tracker loaded');
 
-// Mobile sidebar toggle (for future enhancement)
+// Mobile sidebar toggle
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
+    const btn = document.querySelector('.hamburger-btn');
+    const isOpen = sidebar.classList.toggle('open');
+    if (btn) {
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        btn.classList.toggle('active', isOpen);
+    }
 }
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    const btn = document.querySelector('.hamburger-btn');
+    if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !btn.contains(e.target)) {
+        sidebar.classList.remove('open');
+        if (btn) {
+            btn.setAttribute('aria-expanded', 'false');
+            btn.classList.remove('active');
+        }
+    }
+});
 
 // Auto-hide flash messages after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {

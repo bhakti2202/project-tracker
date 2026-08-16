@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h1>Project Tracker</h1>
             </div>
@@ -27,6 +27,11 @@
 
         <main class="main-content">
             <header class="top-bar">
+                <button class="hamburger-btn" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="sidebar" onclick="toggleSidebar()">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
                 <h2>{% block page_title %}{% endblock %}</h2>
             </header>
 
